@@ -1,13 +1,17 @@
-FROM node:16
+FROM node:16 AS builder
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-
-RUN npm install
-
 COPY . .
+
+RUN npm install --omit=dev
+
+FROM gcr.io/distroless/nodejs:16
+
+COPY --from=builder /usr/src/app /app
+
+WORKDIR /app
 
 EXPOSE 3000
 
-CMD [ "node", "app.js" ]
+CMD [ "app.js" ]
